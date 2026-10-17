@@ -1,15 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using WandEnhancer.Core.Patching.Shared;
 
 namespace WandEnhancer.Core.Patching.Strategies.Static
 {
     internal sealed class StaticStrategy : IPatchStrategy
     {
-        private const string AuxiliaryDirectory = @"static\unpacked\auxiliary";
-        private const string AuxiliarySearchPattern = "*AuxiliaryService.exe";
         private const string ResourcesDirectoryName = "resources";
         private const string AppAsarFileName = "app.asar";
 
@@ -29,23 +26,7 @@ namespace WandEnhancer.Core.Patching.Strategies.Static
                 context.Log?.Invoke("[ENHANCER] No ASAR integrity resource found in Wand.exe; skipping (older Wand build).", ELogType.Info);
             }
 
-            string aux = FindAuxiliary(context.UnpackedPath);
-            if (aux == null)
-            {
-                context.Log?.Invoke("[ENHANCER] No auxiliary service found; skipping check.", ELogType.Info);
-                return;
-            }
-
-            if (AuxTrustNeutralizer.Neutralize(aux, context.Log) < 0)
-            {
-                throw new Exception("[ENHANCER] Could not neutralise the auxiliary service trust check; it would reject the patched Wand.");
-            }
-
-            // Absent on builds before 12.61: not every build has this re-check to neutralise.
-            if (AuxFuseIntegrityNeutralizer.Neutralize(aux, context.Log) < 0)
-            {
-                context.Log?.Invoke("[ENHANCER] No auxiliary ASAR-fuse re-check found; skipping (older Wand build).", ELogType.Info);
-            }
+            AuxiliaryCompatibility.Apply(context, true);
         }
 
         public bool Launch(PatchContext context, string args)
@@ -67,17 +48,5 @@ namespace WandEnhancer.Core.Patching.Strategies.Static
             }
         }
 
-        private static string FindAuxiliary(string unpackedPath)
-        {
-            if (string.IsNullOrEmpty(unpackedPath))
-            {
-                return null;
-            }
-
-            string directory = Path.Combine(unpackedPath, AuxiliaryDirectory);
-            return Directory.Exists(directory)
-                ? Directory.EnumerateFiles(directory, AuxiliarySearchPattern).FirstOrDefault()
-                : null;
-        }
     }
 }

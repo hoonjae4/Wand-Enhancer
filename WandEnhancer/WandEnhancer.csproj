@@ -83,6 +83,7 @@
         <Compile Include="Core\Patching\Shared\ElectronFuseWire.cs" />
         <Compile Include="Core\Patching\Shared\DiskFusePatch.cs" />
         <Compile Include="Core\Patching\Shared\AsarHeaderHash.cs" />
+        <Compile Include="Core\Patching\Shared\AuxiliaryCompatibility.cs" />
         <Compile Include="Core\Patching\Shared\IconTransplant.cs" />
         <Compile Include="Core\Patching\Shared\LauncherDeployment.cs" />
         <Compile Include="Core\Patching\Content\AsarContentPatcher.cs" />
